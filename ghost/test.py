@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 import select
-import sys
 import threading
 import time
 from unittest import TestCase
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 from ghost import Ghost
-
-PY3 = sys.version_info[0] > 2
 
 
 class GhostWSGIServer(WSGIServer):
@@ -52,10 +49,7 @@ class GhostWSGIRequestHandler(WSGIRequestHandler):
             # Sometimes WebKit times out waiting for us.
             return
 
-        if PY3:
-            super(GhostWSGIRequestHandler, self).handle()
-        else:
-            WSGIRequestHandler.handle(self)
+        super().handle()
 
     def log_request(self, code='-', size='-'):
         self.log_message(logging.DEBUG, '"%s" %s %s',
@@ -103,17 +97,13 @@ class ServerThread(threading.Thread):
 class BaseGhostTestCase(TestCase):
     display = False
     wait_timeout = 5
-    viewport_size = (800, 600)
-    log_level = logging.DEBUG
 
     def __new__(cls, *args, **kwargs):
         """Creates Ghost instance."""
         if not hasattr(cls, 'ghost'):
             cls.ghost = Ghost(
-                log_level=cls.log_level,
                 defaults=dict(
                     display=cls.display,
-                    viewport_size=cls.viewport_size,
                     wait_timeout=cls.wait_timeout,
                 )
             )
